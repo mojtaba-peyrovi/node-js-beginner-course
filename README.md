@@ -199,14 +199,140 @@ npm start
 ```
 The server file is located at __bin__ folder and its called www. we can change the server port there.
 
-  
-   
+ ### part 10: Node.js + express templating engines
+ ---
+ The default templating engine coming with express is called Jade.
+ 
+ In views/layouts.jade we have the skeleton of the website. just like layout file at laravel. But in jade files we don't use the <> signs but we use the same tag names and with indentation we show the hierarchy.
+ 
+ The name of Jade has changed to [Pug](https://github.com/pugjs/pug) recently.
+ 
+ If we want to write elements inside the tag but on the next line we have to put a period (.) after the tag. 
+ 
+ for adding type to the tag we need to write the type in parenthesis;
+ ```
+ input(type='text')
+ ```
+ and in order to add classes and id's we do like this:
+ ```
+ input(type='text').class-name#anyid
+ ```
+ When we render a route in routes folder we have this:
+ ```
+ /* GET home page. */
+ router.get('/', function(req, res, next) {
+   res.render('index', { title: 'Express' });
+ });
+ ```
+ this renders the home page we pass the title here, and when we get to the jade file at layout that tile is being loaded. here:
+ ```
+ doctype html
+ html
+   head
+     title= title
+     link(rel='stylesheet', href='/stylesheets/style.css')
+   body
+     ul
+         li My Text
+     input(type='text').class-name#anyid
+     block content
+```
+in the same way we can pass as many variables as we want to the view from route file.
 
-   
-      
-   
-    
+for example we can pass condition:true--
+```
+/* GET home page. */
+router.get('/', function(req, res, next) {
+  res.render('index', { title: 'Express', condition: true });
+});
+```
+and when we want to render the layout we can pass this variable and make an if condition:
+```
+  if  condition
+        p it is true
+```
+this returns 'it is true' on the home page. 
 
+we can also define a variable inside the view like this:
 
+```
+- var condition = true
+```
+It can over-right variables on the top of variables we pass from the route.
+
+We can also make loops. here is an example:
+
+```
+ - var anyArray = [1,2,3]
+        each value in anyArray
+            p= value
+```
+__block content__: its like yield in laravel blade engine. 
+
+but we dont use section-yield we just write block content in both layout and the view.
+
+* anytime we have a combination of text and variable for the variable we use this notation:
+```
+#{varaiblle_name}
+```   
+ ### part 11: Handlebars templating engine
+ ---
+ In order to start using Handlebars instead of Jade first we need to remove Jade entirely from dependencies and the app. we do it this way:
+ ```angularjs
+Terminal: npm uninstall jade --save
+```
+Now it's time to install handlebars:
+```angularjs
+Terminal: npm install express-handlebars --save
+```
+Next we require handle bars inside app.js
+```angularjs
+var hbs = require('express-handlebars');
+```      
+the we add more settings to app.js
+```angularjs
+// view engine setup
+app.engine('hbs', hbs({extname:'hbs', defaultLayout: 'layout', layoutsDir: __dirname + '/views/layouts'}));
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
+```   
+Now under views we have to make a new folder called __layouts__.
+
+Then we move layouts.jade into views/layouts folder and rename the extension from jade to hbs.
+
+ * rendering variables is like laravel we just use:
+ ```angularjs
+{{variable_name}}
+```  
+* instead of yield we say:
+```angularjs
+{{{ body}}}
+```        
+When we want to change the view in order to use hbs we just change the extension again from .jade to .hbs and the good thing is we can use normal html and everytime we want to have variables we just use {{}}.
+
+Also we dont need to extend the layout. we just start writing the html. 
+
+we should also change the error.jade file to error.hbs and edit it like this:
+```angularjs
+<h1>{{message}}</h1>
+```
+thats it for error.hbs. just one line.
+
+*here is how we write if statements in handelbars:
+
+```angularjs
+{{# if condition }}
+ ...
+{{ else }}
+...
+{{/if}}
+```
+here is how we do each iteration:
+
+```angularjs
+{{# each anyArray}}
+    {{ this }}
+   {{/each}}
+   ```
 
 

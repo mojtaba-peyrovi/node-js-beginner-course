@@ -3,3 +3,13 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
+
+  ul
+      li My Text
+      input(type='text').class-name#anyid
+      - var condition = true
+      if  condition
+          p it is true
+      - var anyArray = [1,2,3]
+          each value in anyArray
+              p= value
