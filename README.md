@@ -334,5 +334,142 @@ here is how we do each iteration:
     {{ this }}
    {{/each}}
    ```
+### part 12: Get and Post requests
+---
+First we copy the last project and save it as  a new project (07).
+#### Get Rquest:
+Now inside routes/index.js we add a new route like this:
+```angularjs
+router.get('/test/:id', function(req, res, next) {
+   res.render('test', {output: req.params.id});
+});
+```
+the colon behind id means that this route expects an id to be passed.
+The output object will be available later in the templating engine.
+
+In order to access the id, we need to fetch it like req.params.id.
+
+* if we had another parameter like param2 we can access it this way:
+
+```angularjs
+router.get('/test/:id/:param2', function(req, res, next) {
+   res.render('test', {output: req.params.param2});
+});
+```
+Now it's time to create the test view that doesn't still exist.
+inside test.hbs (test view) we can access the output object using {{ output }} notation.
+
+Now if we run the application and go to this route: /test/5 it makes 'output' object equal to 5 and fetched is to the view.
+
+#### Post Request:
+first we make a simple form in index.hbs view that has one input for id and a submit button. the submission will send a post request to this route: /test/submit
+
+Noe inside route/index.js we add a post route like this:
+
+```angularjs
+router.post('/test/submit', function(req, res, next) {
+    var id = req.body.id;
+    res = redirect('/test/' + id);
+});
+```
+Now when we get to index view and put a number in the form and submit, we will be redirected to the route we want with the id fetched in the url.
+
+### part 13: Express-Validator and Express-Session
+---
+In order to be able to use validator and session packages we need to install them via npm:
+```angularjs
+ Terminal: npm install --save express-validator
+ 
+ Terminal: npm install --save express-session
+```
+Next step is to require them in the project. For doing this we need to import them on the top of app.js:
+```angularjs
+var expressValidator = require('express-validator');
+var expressSession = require('express-session');
+```
+then we need to set them up after the body being parsed. __Important__: the validator has to be added after this line not before it:
+```angularjs
+app.use(express.urlencoded({ extended: false }));
+app.use(expressValidator());
+```
+Now at the end of the 'use' lines we add  the session:
+```angularjs
+app.use(expressSession({secret: 'max', saveUninitialized:false, resave: false}));
+```
+The javascript object passed to it simply says save the session only if it's modified not always.
+
+__IMPORTANT:__
+
+Sessions have to be stored on server and cookies just stored the session id. So we need to find a repository online to hook up with our project to save the sessions.For doing this [here](https://github.com/expressjs/session#compatible-session-stores) is a list of them.
+
+We can use the default option which is using of memory but for production we can't do this and we need to setup a server for sessions.
+
+Because we want to check if sessions work we can make some errors and retrieve them from sessions. so, we should change our index route like this:
+```angularjs
+router.get('/', function(req, res, next) {
+  res.render('index', { title: 'Form Validation', success: false, errors: req.session.errors });
+  req.session.errors = null;  
+  // first we make sure there is no error saved in session//
+});
+```
+Also there are so many built-in valadators we can use [here](https://github.com/chriso/validator.js#validators)
+
+For validation we need to make a form with post request and get to route/index.js and add this function:
+```angularjs
+router.post('/submit', function(req, res, next) {
+  //check validity
+  req.check('email', 'Invalid email address').isEmail();
+  req.check('password', 'Invalid passord').isLength({min:4}).equals(req.body.comfirmPassword);
+  var errors = req.validationErrors();
+  if(errors) {
+      req.session.errors = errors;
+  }
+  res.redirect('/');
+});
+```
+methods check(), validationErrors(), isEmail(), isLength() and equals() all come from express-validation package.
+
+* now we can check the form and see if the validation doesn't pass the form gets redirected back. For seeing the error messages we need to fetch them in the view.
+
+Here is how we fetch success and error messages in the view:
+```angularjs
+<h1>{{ title }} </h1>
+<P> welcome to {{ title }} </p>
+<p>No 8</p>
+{{# if success }}
+    <section class="success">
+        <h2>Successful Validation</h2>
+    </section>
+{{else}}
+    {{# if errors }}
+        <section class="errors">
+            <ul>
+                {{#each errors}}
+                  <li>{{ this.msg }}</li>
+                {{/each}}
+            </ul>
+        </section>
+    {{/if}}
+    <form action="/submit" method="post">
+        <div class="input">
+            <label for="email">E-mail</label>
+            <input type="text" id="email" name="email">
+        </div>
+        <div class="input">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password">
+        </div>
+        <div class="input">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword">
+        </div>
+        <button type="submit">Sign up</button>
+</form>
+{{/if}}
+```
+In order for the success message to work we need to do some  changes in route/index.js in lines __6, 8, 18, 20__.
+
+Now it works as expected.
+
 
 
