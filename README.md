@@ -470,6 +470,51 @@ Here is how we fetch success and error messages in the view:
 In order for the success message to work we need to do some  changes in route/index.js in lines __6, 8, 18, 20__.
 
 Now it works as expected.
+ ### part 14: MongoDB setup:
+ ---
+Installed MongoDB.
 
+### part 15: Insert and get data with MongoDB:
+ ---
+First we make a new folder for this project (09)
 
+Then we need to navigate to it and run:
 
+```angularjs
+  Terminal: npm install --save mongodb
+```
+It installs the express extension to make it ready to use mongodb.
+
+Then copied some html and css from his github.
+
+Next thing is get to route/index.js and require 2 things:
+```angularjs
+var mongo = require('mongodb').MongoClient;
+var assert = require('assert');
+```
+then under the imports we add the url:
+```angularjs
+var url = 'mongodb://localhost:27017/test';
+```
+test is the name of the built it database for testing. if we have our own database we should write that instead of test.
+
+__IMPORTANT:__ mongodb doesn't have tables, instead of tables, mongodb has _collections_.
+
+all the crud code have been written inside routes/index.js but there is an issue; the function db.collection() doesn't work with newer mnogodb versions and I changed it to 
+```angularjs
+"mongodb": "^2.2.33"
+```
+I added this to package.json and ran npm install. Then it worked.
+### part 16: Update and Delete data with MongoDB:
+ ---
+In order to update, the code is so similar to post, just we need to have an id that we can get it from req.body object and also we need to change insertOne to udpdateOne add something like this:
+```angularjs
+{"_id":ObjectId(id)},{$set: item}
+```
+as the first and second parameters of updateOne(). Practically these two parameter mean, new data (first object) and old data found by $set in the second object.
+
+Next we need to require one more thing:
+```angularjs
+var ObjectId = require('mongodb').ObjectID;
+```
+For deleting the item its so simple we just copy some code from update and change updateOne to deleteOne and erase the second parameter. that's it.
