@@ -518,3 +518,76 @@ Next we need to require one more thing:
 var ObjectId = require('mongodb').ObjectID;
 ```
 For deleting the item its so simple we just copy some code from update and change updateOne to deleteOne and erase the second parameter. that's it.
+### part 17: MongoDB+Monk
+---
+In order to make CRUD and some other database functionality with MongoDB we can use a library called Monk. It works with mongodb version 1.4.1 so the first thing is to go to package.json and change the version of mongodb to 1.4.1.
+
+Then we run 
+```angularjs
+Terminal: npm install --save monk
+```
+In order to use it first we delete all mongo related codes in route/index.js file. 
+
+Now we should require monk and get user-data object like this:
+```angularjs
+var db = require('monk')('localhost:27017/test');
+var userData = db.get('user-data');
+```
+Now we can write the get function like this:
+```angularjs
+
+router.get('/get-data', function(req, res, next) {
+    var resultArray = [];
+    var data = userData.find({});
+    data.on('succes', function(docs){
+        res.render('index', {items: docs});
+    });
+});
+```
+Post function is so simple we just add this one line to the code block:
+```angularjs
+userData.insert(item);
+```
+For updating we do it two ways:
+```angularjs
+1)    userData.update({"_id": db.id(id)}, item);   
+```
+or 
+```angularjs
+2) userData.updateById(id, item);
+```
+Also delete can be done two ways similarly.
+```angularjs
+1) userData.remove({"_id": db.id(id)});
+2) userData.removeById(id);
+```
+
+### part 18: Mongoose
+---
+It is something like laravel eloquent. When we install it mongodb extension is alerady built-in so we dont need to have mongodb separately. So, we delete mongodb from package.json and in terminal install mongoose:
+```angularjs
+Terminal: npm install --save mongoose
+```
+Then we delete all mongo related codes.
+
+Now we import mongoose and open the database connection like this:
+```angularjs
+var mongoose = require('mogoose');
+mongoose.connect('localhost:27017/test');
+```
+Next we have to define the schema like this:
+```angularjs
+var schema = mongoose.Schema;
+var userDataSchema = new Schema({
+  title: {type: String, required: true},
+  content: String,
+  author: String
+}, {collection:'user-data'});
+```
+Then we need to define a model like this:
+```
+var userData = mongoose.model('UserData', userDataSchema);
+```
+for CRUD it works so similar to laravel eloquent as we can see in the source code.
+
+### END OF SERIES
